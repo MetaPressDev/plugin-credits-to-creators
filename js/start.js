@@ -38,54 +38,46 @@ export default class CreditsToCreators {
     }
 
     $ai_getKnowledgeBaseEntries = () => {
-        if (metapress.editor.canEdit)
-            return [
-                {
-                    id: `${this.id}:addCreditsToCreators`,
-                    type: 'action',
-                    name: 'Add Credits to Creators',
-                    tags: 'add credits to creators, add credits',
-                    content: `
+
+        return [
+            {
+                id: `${this.id}:addCreditsToCreators`,
+                type: 'action',
+                name: 'Add Credits to Creators',
+                tags: 'add credits to creators, add credits',
+                disabled: !metapress.editor?.canEdit,
+                content: `
                     Assistant instruction: Run this action when the user wants to add the credits to creators modifier to an object. Don't mention it otherwise.
                 `,
-                    action: input => {
-                        return this.addCreditToCreators()
-                    }
-                },
-                {
-                    id: `${this.id}:infoCreditsToCreators`,
-                    type: 'info',
-                    name: 'Credits to Creators',
-                    tags: 'credits to creators, about credits, about credits to creators',
-                    content: `
-                    Credits to creators is an external plugin that allows you to add credits to creators modifier to an object. Which allows non-editors to
-                    see the credits in the settings menu, under the about section.
-                `,
-                },
-            ]
-        else return [
+                action: input => {
+                    return this.addCreditToCreators()
+                }
+            },
             {
                 id: `${this.id}:infoCreditsToCreators`,
                 type: 'info',
                 name: 'Credits to Creators',
                 tags: 'credits to creators, about credits, about credits to creators',
-                content: `
-                    Credits to creators is an external plugin that allows you to see credits given to creators in the settings menu.
-                `,
+
+                content: metapress.editor?.canEdit ? `
+                    Credits to creators is an external plugin that allows you to add credits to creators modifier to an object. Which allows non-editors to
+                    see the credits in the settings menu, under the about section.
+                `: `Credits to creators is an external plugin that allows you to see credits given to creators in the settings menu.`,
             },
         ]
+
     }
 
     addCreditToCreators() {
         try {
-            if(!metapress.editor?.selectionManager || metapress.editor.selectionManager.selectedEntityIDs.length !== 1){
+            if (!metapress.editor?.selectionManager || metapress.editor.selectionManager.selectedEntityIDs.length !== 1) {
                 return 'Please select a single entity to add the Credits to creators with Web Weaver Settings'
             }
             // get the selected entity
             const selectedObject = metapress.entities.get(metapress.editor.selectionManager.selectedEntityIDs[0])
             // add the Credits to creator modifier to the selected object
             metapress.entities.update(selectedObject.id, {
-                ['modifier:' + this.createModifier().id]: true
+                ['modifier:' + 'creditsToCreators']: true
             })
             metapress.plugins.sendEvent('onUnsavedFieldsChanged')
             metapress.editor.showEditor();
